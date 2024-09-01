@@ -66,6 +66,8 @@ public enum Message {
     COMMAND_FLY_DISABLE("&7Flight mode <error>disable &7for &f%player%<success>."),
     COMMAND_GOD_ENABLE("&7God mode <success>enable &7for &f%player%<success>."),
     COMMAND_GOD_DISABLE("&7God mode <error>disable &7for &f%player%<success>."),
+    COMMAND_NIGHT_VISION_ENABLE("&7Night vision <success>enable &7for &f%player%<success>."),
+    COMMAND_NIGHT_VISION_DISABLE("&7Night vision <error>disable &7for &f%player%<success>."),
     COMMAND_HEAL_SENDER("&7You just healed the player &f%player%&7."),
     COMMAND_HEAL_RECEIVER("<success>You have been healed."),
     COMMAND_HEAL_ERROR("<error>You cannot heal someone who is dead !"),
@@ -97,6 +99,8 @@ public enum Message {
     COMMAND_TP_CANCEL_SENDER("<error>Cancelled #99E0FFyour teleport request to %player%."),
     COMMAND_TP_CANCEL_RECEIVER("&f%player% <error>cancelled their teleport request to you."),
     COMMAND_TP("&7You just teleport to the player #34cfe0%player%&f."),
+    COMMAND_TP_LOCATION("&7You just teleport to #34cfe0%x%&f, #34cfe0%y%&f, #34cfe0%z%&f."),
+    COMMAND_TP_LOCATION_OTHER("&7You just teleport #34cfe0%player% &fto #34cfe0%x%&f, #34cfe0%y%&f, #34cfe0%z%&f."),
     COMMAND_TP_ALL("&7You just teleported all the players onto you."),
     COMMAND_TP_SELF("&7You just teleported #34cfe0%player%&7 to your position."),
     COMMAND_BACK("&7Returning to previous location."),
@@ -228,6 +232,8 @@ public enum Message {
     DESCRIPTION_POWER_TOOLS("Add command to your items"),
     DESCRIPTION_MAIL("Open mailbox"),
     DESCRIPTION_MAIL_OPEN("Open player's mailbox"),
+    DESCRIPTION_MAIL_GIVE("Give an item to player's mailbox"),
+    DESCRIPTION_MAIL_GIVEALL("Give an items to players mailbox"),
     DESCRIPTION_RULES("Read server rules"),
     DESCRIPTION_HOLOGRAM("Show hologram commands"),
     DESCRIPTION_HOLOGRAM_CREATE("Create a hologram"),
@@ -264,6 +270,27 @@ public enum Message {
     DESCRIPTION_VOTE_SET("Set the number of votes for a player"),
     DESCRIPTION_VOTE_ADD("Add votes to a player"),
     DESCRIPTION_VOTE_REMOVE("Remove votes from a player"),
+    DESCRIPTION_ENCHANT("Add enchant to an item"),
+    DESCRIPTION_NIGHT_VISION("Enable or disable night vision"),
+    DESCRIPTION_SUDO("Force a player to execute a command"),
+    DESCRIPTION_WORLDEDIT_GIVE("Give a worldedit item to a player"),
+    DESCRIPTION_WORLDEDIT_SET("Set all blocks of your selection"),
+    DESCRIPTION_WORLDEDIT_WALLS("Set all blocks of your selection with a walls"),
+    DESCRIPTION_WORLDEDIT_SPHERE("Set all blocks of your selection with a sphere"),
+    DESCRIPTION_WORLDEDIT_FILL("Fill all blocks of your selection"),
+    DESCRIPTION_WORLDEDIT_CYL("Fill all blocks of your selection with a cylinder"),
+    DESCRIPTION_WORLDEDIT_CUT("Cut all blocks of your selection"),
+    DESCRIPTION_WORLDEDIT_STOP("Stop the current edition"),
+    DESCRIPTION_WORLDEDIT_CONFIRM("Confirm worldedit action"),
+    DESCRIPTION_WORLDEDIT_POS1("Set first position of the selection"),
+    DESCRIPTION_WORLDEDIT_POS2("Set second position of the selection"),
+    DESCRIPTION_WORLDEDIT_OPTION("Configure your use of worldedit"),
+    DESCRIPTION_WORLDEDIT_OPTION_INVENTORY("Use your inventory to take or add items"),
+    DESCRIPTION_WORLDEDIT_OPTION_BOSSBAR("Enable or disable the worldedit progress bar"),
+    DESCRIPTION_VAULT_GIVE("Give items to player's vault"),
+    DESCRIPTION_VAULT_ADD_SLOT("Add slot to player's vault"),
+    DESCRIPTION_VAULT_SET_SLOT("Set slot to player's vault"),
+    DESCRIPTION_SHOW_ITEM("Show player's item"),
 
 
     YOU("you"),
@@ -325,6 +352,12 @@ public enum Message {
             " &7- #99E0FF%economy-name-coins% &f%economy-coins%."
     ),
 
+    COMMAND_MONEY_OTHER(
+            "#99E0FF%player% have&8:",
+            " &7- #99E0FF%economy-name-money% &f%economy-money%.",
+            " &7- #99E0FF%economy-name-coins% &f%economy-coins%."
+    ),
+
     COMMAND_PAY_NEGATIVE("<error>Amount to pay must be positive."),
     COMMAND_PAY_MIN("<error>The minimum amount you can pay is &f%amount%<error>."),
     COMMAND_PAY_MAX("<error>The maximum amount you can pay is &f%amount%<error>."),
@@ -354,7 +387,7 @@ public enum Message {
     COMMAND_WARP_NO_PERMISSION("<error>You do not have permission to use the warp &f%name%<error>."),
     COMMAND_WARP_CREATE(
             "<success>You just created the warp &f%name% <success>to your position.",
-            "&7Warp Permission is: <hover:show_text:'&fCopy command to add permission to a player'><click:SUGGEST_COMMAND:'/lp user <username> permission set nessentials.warp.%name%'>&f&nessentials.warp.%name%</click></hover>"
+            "&7Warp Permission is: <hover:show_text:'&fCopy command to add permission to a player'><click:SUGGEST_COMMAND:'/lp user <username> permission set essentials.warp.%name%'>&f&nessentials.warp.%name%</click></hover>"
     ),
     COMMAND_WARP_USE(
             "<error>Usage&8: &f/warp <destination>",
@@ -570,8 +603,9 @@ public enum Message {
     COMMAND_ITEM_LORE_CLEAR("<success>You just clear the item lore."),
     COMMAND_ITEM_LORE_SET_ERROR("<error>Can’t find the line &f%line%<error>."),
     COMMAND_GIVE_ERROR("<error>Can’t find the item &f%item%<error>."),
-    COMMAND_GIVE("<success>You just gave &n&fx1 %item%&r <success>to player &f%player%<success>."),
-    COMMAND_GIVE_ALL("<success>You just gave &n&fx1 %item%&r <success>to online player."),
+    COMMAND_GIVE("<success>You just gave &n&fx%amount% %item%&r <success>to player &f%player%<success>."),
+    COMMAND_GIVE_VAULT("<success>You just gave &n&fx%amount% %item%&r <success>to &f%player%<success> vault's."),
+    COMMAND_GIVE_ALL("<success>You just gave &n&fx%amount% %item%&r <success>to online player."),
 
     COMMAND_POWER_TOOL_ERROR_ITEM("<error>You have no item in your hand."),
     COMMAND_POWER_TOOL_ERROR_RESET("<error>This item has no recorded command."),
@@ -581,15 +615,17 @@ public enum Message {
     MAILBOX_REMOVE_FULL("<error>You must have space in your inventory to retrieve an item."),
     MAILBOX_REMOVE_EXPIRE("<error>You can no longer retrieve this item, it has expired."),
     MAILBOX_ADD(MessageType.ACTION, "<success>An item has just been added to your mailbox &8(&f/mail&8)"),
+    MAILBOX_GIVE_ERROR("<error>Can’t find the item &f%item%<error>."),
+    MAILBOX_GIVE("<success>You just gave &n&fx%amount% %item%&r <success>to player &f%player%<success> mailbox."),
+    MAILBOX_GIVE_ALL("<success>You just gave &n&fx%amount% %item%&r <success>to online player mailbox."),
+
 
     HOLOGRAM_CREATE_ERROR("<error>Hologram &f%name% <error>already exists."),
     HOLOGRAM_CREATE(MessageType.WITHOUT_PREFIX,
             "<success>You just created the hologram &f%name%<success>.",
             "&7Use &n<click:run_command:'/hologram edit %name%'>/hologram edit %name%</click>&r&7 command to edit the hologram"
     ),
-
     HOLOGRAM_DELETE("<success>Hologram &f%name% <success>has been deleted."),
-
     HOLOGRAM_DOESNT_EXIST("<error>Hologram &f%name% <error>doesn't exists."),
     HOLOGRAM_IS_NOT_A_TEXT("<error>Hologram &f%name% <error>is not a text hologram."),
     HOLOGRAM_IS_NOT_A_BLOCK("<error>Hologram &f%name% <error>is not a block hologram."),
@@ -666,6 +702,74 @@ public enum Message {
     COMMAND_VAULT_RENAME_SUCCESS("<success>You just set the vault name to &f%name%<success>."),
     COMMAND_VAULT_RENAME_ERROR("<error>You cannot use this name for your vault."),
     COMMAND_VAULT_RENAME_RESET("<success>You just reset the name of your vault."),
+
+    COMMAND_ENCHANT_INVALID("<error>You need to specify a valid player."),
+    COMMAND_ENCHANT_ERROR_ENCHANT("<error>Impossible to find the enchantment &f%name%<error>."),
+    COMMAND_ENCHANT_ERROR_ITEM_SELF("<error>You must have an item in your hand."),
+    COMMAND_ENCHANT_ERROR_ITEM_PLAYER("<error>%player% has no item in his hand."),
+    COMMAND_ENCHANT_REMOVE_SELF("<success>The enchantment &f%enchant% <success>has been removed from your item in hand."),
+    COMMAND_ENCHANT_REMOVE_PLAYER("<success>The enchantment &f%enchant% <success>has been removed from the item from &f%player%’s<succes> hand."),
+    COMMAND_ENCHANT_SUCCESS_SELF("<success>The enchantment &f%enchant% <success>has been applied to your item in hand."),
+    COMMAND_ENCHANT_SUCCESS_PLAYER("<success>The enchantment &f%enchant% <success>has been applied to the item from &f%player%’s<succes> hand."),
+
+    COMMAND_SUDO_ERROR("<error>You cannot force the player to execute commands."),
+    COMMAND_SUDO_COMMAND("<success>You just forced the player <white>%player% <success>to execute the command <white>%command%<success>."),
+    COMMAND_SUDO_MESSAGE("<success>You just forced the player <white>%player% <success>to send the message <white>%message%<success>."),
+
+    COMMAND_WORLDEDIT_GIVE_ERROR("<error>Unable to find item &f%name%<error>"),
+    COMMAND_WORLDEDIT_GIVE_SENDER("<success>You just gave &f%item% <success>to the player &f%player%<success>."),
+    COMMAND_WORLDEDIT_GIVE_RECEIVER("<success>you just received &f%item%<success>."),
+    COMMAND_WORLDEDIT_MATERIAL_NOT_FOUND("<error>Unable to find the material &f%material%<error>."),
+    COMMAND_WORLDEDIT_CONFIRM_PRICE(
+            "",
+            "<success>Price<dark_gray>: <white>%price%",
+            "<success>Blocks<dark_gray>: <white>%materials%",
+            "<success>Duration<dark_gray>: <white>%duration% <dark_gray>(<gray>%blocks% at %speed% block%s%/s)",
+            "",
+            "<#45ff55><hover:show_text:'&fClick to confirm action'><click:run_command:'/pw confirm'>ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ᴄᴏɴғɪʀᴍ</click></hover><gray>"
+    ),
+    COMMAND_WORLDEDIT_CONFIRM_PRICE_CUT(
+            "",
+            "<success>Price<dark_gray>: <white>%price%",
+            "<success>Duration<dark_gray>: <white>%duration% <dark_gray>(<gray>%blocks% at %speed% block%s%/s)",
+            "",
+            "<#45ff55><hover:show_text:'&fClick to confirm action'><click:run_command:'/pw confirm'>ᴄʟɪᴄᴋ ʜᴇʀᴇ ᴛᴏ ᴄᴏɴғɪʀᴍ</click></hover><gray>"
+    ),
+    COMMAND_WORLDEDIT_CONFIRM_MATERIAL("<hover:show_text:'<white>Amount<dark_gray>: <aqua>%amount%<newline><white>Total Price<dark_gray>: <aqua>%price%<newline><white>Price per block<dark_gray>: <aqua>%price-per-block%'><lang:%translation-key%></hover>"),
+    COMMAND_WORLDEDIT_CONFIRM_ERROR("<error>You can’t do that now."),
+
+    COMMAND_WORLDEDIT_STOP_EMPTY("<error>You have no current edition."),
+    COMMAND_WORLDEDIT_STOP_ERROR("<error>You cannot stop editing currently."),
+    COMMAND_WORLDEDIT_ERROR_ITEM("<error>You must have the worldedit tool in your hand."),
+    COMMAND_WORLDEDIT_ERROR_MAX("<error>You can only use this tool, it has been used to the maximum."),
+    COMMAND_WORLDEDIT_OPTION_INVENTORY_ENABLE("<success>You have just activated worldedit to use your inventory."),
+    COMMAND_WORLDEDIT_OPTION_INVENTORY_DISABLE("<error>You just disabled worldedit to use your inventory."),
+    COMMAND_WORLDEDIT_OPTION_BOSSBAR_ENABLE("<success>You have just activated worldedit progress bar."),
+    COMMAND_WORLDEDIT_OPTION_BOSSBAR_DISABLE("<error>You just disabled worldedit worldedit progress bar."),
+
+    WORLDEDIT_SELECTION_ERROR("<error>You must select two positions before you make this command."),
+    WORLDEDIT_SELECTION_VOLUME("<error>You cannot change more than &f%blocks% <error>at the same time."),
+    WORLDEDIT_SELECTION_DISTANCE("<error>The distance between your two points in your selection is too large. <dark_gray>(<gray>Maximum <white>%distance% <gray>blocks<dark_gray>)"),
+    WORLDEDIT_ALREADY_RUNNING("<error>You already have an edit in progress, please wait until it is finished."),
+    WORLDEDIT_NOT_ENOUGH_MONEY("<error>You don’t have enough money to make this edition."),
+    WORLDEDIT_NOT_ENOUGH_ITEMS("<error>You don’t have the items in your inventory, you can’t do that."),
+    WORLDEDIT_SELECTION_POS1("<success>You have just defined the first position."),
+    WORLDEDIT_SELECTION_POS2("<success>You have just defined the second position."),
+    WORLDEDIT_SPEED_ERROR("<error>You have no permission to set speed per second."),
+
+    WORLDEDIT_START_CALCULATE_PRICE("&7Price calculation in progress, please wait..."),
+    WORLDEDIT_START_CHECK_INVENTORY("&7Checking that you have enough items in your inventory, please wait..."),
+    WORLDEDIT_START_RUNNING("&7Launch of current edition, please wait..."),
+    WORLDEDIT_FINISH("<success>Edition completed !"),
+    WORLDEDIT_REFUND(
+            "<success>ʏᴏᴜ'ᴠᴇ ᴊᴜsᴛ ʙᴇᴇɴ ʀᴇғᴜɴᴅ",
+            "",
+            "<success>Price<dark_gray>: <white>%price%",
+            "<success>Blocks<dark_gray>:%materials%"
+    ),
+    WORLDEDIT_REFUND_MATERIAL(" <white><hover:show_text:'<white>Amount<dark_gray>: <aqua>%amount%<newline><white>Total Price<dark_gray>: <aqua>%price%<newline><white>Price per block<dark_gray>: <aqua>%price-per-block%'><lang:%translation-key%></hover><gray>"),
+    WORLDEDIT_REFUND_EMPTY("<error>No block to refund"),
+    WORLDEDIT_BOSSBAR("#45ff45Time remaining<dark_gray>: <white>%time%"),
 
     ;
 

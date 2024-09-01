@@ -6,6 +6,7 @@ import fr.maxlego08.essentials.api.dto.PlayerSlotDTO;
 import fr.maxlego08.essentials.api.dto.VaultDTO;
 import fr.maxlego08.essentials.api.dto.VaultItemDTO;
 import fr.maxlego08.essentials.api.messages.Message;
+import fr.maxlego08.essentials.api.vault.PermissionSlotsVault;
 import fr.maxlego08.essentials.api.vault.PlayerVaults;
 import fr.maxlego08.essentials.api.vault.Vault;
 import fr.maxlego08.essentials.api.vault.VaultItem;
@@ -13,15 +14,19 @@ import fr.maxlego08.essentials.api.vault.VaultManager;
 import fr.maxlego08.essentials.api.vault.VaultResult;
 import fr.maxlego08.essentials.module.ZModule;
 import fr.maxlego08.menu.zcore.utils.nms.ItemStackUtils;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +40,7 @@ public class VaultModule extends ZModule implements VaultManager {
     private String iconOpen;
     private String iconClose;
     private String vaultNameRegex;
+    private List<PermissionSlotsVault> vaultPermissions;
 
     public VaultModule(ZEssentialsPlugin plugin) {
         super(plugin, "vault");
@@ -118,8 +124,15 @@ public class VaultModule extends ZModule implements VaultManager {
     }
 
     @Override
-    public void addPlayerSlot(CommandSender sender, OfflinePlayer offlinePlayer, int slot) {
+    public int getMaxSlotsPlayer(Player player) {
+        return Math.max(getPlayerVaults(player.getUniqueId()).getSlots(),
+                this.vaultPermissions.stream()
+                        .filter(permission -> player.hasPermission(permission.permission()))
+                        .mapToInt(PermissionSlotsVault::slots).max().orElse(0));
+    }
 
+    @Override
+    public void addPlayerSlot(CommandSender sender, OfflinePlayer offlinePlayer, int slot) {
         PlayerVaults playerVaults = getPlayerVaults(offlinePlayer);
         playerVaults.setSlots(playerVaults.getSlots() + slot);
 
@@ -242,8 +255,9 @@ public class VaultModule extends ZModule implements VaultManager {
     @Override
     public List<String> getVaultAsTabCompletion(Player player) {
         List<String> strings = IntStream.range(1, this.maxVaults).filter(vaultID -> hasPermission(player.getUniqueId(), vaultID)).mapToObj(String::valueOf).collect(Collectors.toList());
-        if (hasPermission(player, Permission.VAULT_ADD_SLOT)) strings.add("add");
-        if (hasPermission(player, Permission.VAULT_SET_SLOT)) strings.add("set");
+        if (hasPermission(player, Permission.ESSENTIALS_VAULT_ADD_SLOT)) strings.add("add");
+        if (hasPermission(player, Permission.ESSENTIALS_VAULT_SET_SLOT)) strings.add("set");
+        if (hasPermission(player, Permission.ESSENTIALS_VAULT_GIVE)) strings.add("give");
         return strings;
     }
 
@@ -326,5 +340,62 @@ public class VaultModule extends ZModule implements VaultManager {
         getStorage().updateVault(player.getUniqueId(), vault);
         message(player, Message.COMMAND_VAULT_RENAME_RESET);
         openVault(player, vault.getVaultId());
+    }
+
+    @Override
+    public boolean addItem(UUID uniqueId, ItemStack itemStack) {
+        return addItem(uniqueId, itemStack, itemStack.getAmount());
+    }
+
+    @Override
+    public boolean addItem(UUID uniqueId, ItemStack itemStack, long amount) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+
+        var storage = getStorage();
+        var playerVaults = getPlayerVaults(uniqueId);
+
+        var vault = playerVaults.find(itemStack).orElseGet(playerVaults::firstAvailableVault);
+
+        vault.find(itemStack).ifPresentOrElse(vaultItem -> {
+            vaultItem.addQuantity(amount);
+            storage.updateVaultQuantity(uniqueId, vault.getVaultId(), vaultItem.getSlot(), vaultItem.getQuantity());
+        }, () -> {
+            int nextSlot = vault.getNextSlot();
+            VaultItem newVaultItem = new ZVaultItem(nextSlot, itemStack, amount);
+            vault.getVaultItems().put(nextSlot, newVaultItem);
+            storage.createVaultItem(uniqueId, vault.getVaultId(), nextSlot, newVaultItem.getQuantity(), ItemStackUtils.serializeItemStack(itemStack));
+        });
+        return true;
+    }
+
+    @Override
+    public long getMaterialAmount(Player player, Material material) {
+        PlayerVaults playerVaults = getPlayerVaults(player.getUniqueId());
+        return playerVaults.getVaults().values().stream().mapToLong(vault -> vault.getMaterialAmount(material)).sum();
+    }
+
+    @Override
+    public void removeMaterial(Player player, Material material, long amountToRemove) {
+        PlayerVaults playerVaults = getPlayerVaults(player.getUniqueId());
+        var itemStack = new ItemStack(material);
+        for (Vault vault : playerVaults.getVaults().values()) {
+            var optional = vault.find(itemStack);
+            if (optional.isPresent()) {
+                var vaultItem = optional.get();
+                vaultItem.removeQuantity(amountToRemove);
+                getStorage().updateVaultQuantity(player.getUniqueId(), vault.getVaultId(), vaultItem.getSlot(), vaultItem.getQuantity());
+                return;
+            }
+        }
+    }
+
+    @Override
+    public Collection<Material> getMaterials(Player player) {
+        Set<Material> materials = new HashSet<>();
+        PlayerVaults playerVaults = getPlayerVaults(player.getUniqueId());
+        for (Vault vault : playerVaults.getVaults().values()) {
+            materials.addAll(vault.getVaultItems().values().stream().map(vaultItem -> vaultItem.getItemStack().getType()).toList());
+        }
+        return materials;
     }
 }

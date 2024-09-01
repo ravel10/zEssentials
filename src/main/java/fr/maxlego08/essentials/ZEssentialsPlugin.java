@@ -11,6 +11,7 @@ import fr.maxlego08.essentials.api.EssentialsPlugin;
 import fr.maxlego08.essentials.api.chat.InteractiveChat;
 import fr.maxlego08.essentials.api.commands.CommandManager;
 import fr.maxlego08.essentials.api.economy.EconomyManager;
+import fr.maxlego08.essentials.api.enchantment.Enchantments;
 import fr.maxlego08.essentials.api.hologram.HologramManager;
 import fr.maxlego08.essentials.api.kit.Kit;
 import fr.maxlego08.essentials.api.modules.ModuleManager;
@@ -28,6 +29,7 @@ import fr.maxlego08.essentials.api.utils.Warp;
 import fr.maxlego08.essentials.api.utils.component.ComponentMessage;
 import fr.maxlego08.essentials.api.vault.VaultManager;
 import fr.maxlego08.essentials.api.vote.VoteManager;
+import fr.maxlego08.essentials.api.worldedit.WorldeditManager;
 import fr.maxlego08.essentials.buttons.ButtonHomes;
 import fr.maxlego08.essentials.buttons.ButtonPayConfirm;
 import fr.maxlego08.essentials.buttons.ButtonTeleportationConfirm;
@@ -47,8 +49,10 @@ import fr.maxlego08.essentials.commands.CommandLoader;
 import fr.maxlego08.essentials.commands.ZCommandManager;
 import fr.maxlego08.essentials.commands.commands.essentials.CommandEssentials;
 import fr.maxlego08.essentials.economy.EconomyModule;
+import fr.maxlego08.essentials.enchantments.ZEnchantments;
 import fr.maxlego08.essentials.hologram.HologramModule;
 import fr.maxlego08.essentials.kit.KitModule;
+import fr.maxlego08.essentials.listener.InvseeListener;
 import fr.maxlego08.essentials.listener.PlayerListener;
 import fr.maxlego08.essentials.loader.ButtonKitCooldownLoader;
 import fr.maxlego08.essentials.loader.ButtonKitGetLoader;
@@ -57,25 +61,6 @@ import fr.maxlego08.essentials.loader.ButtonWarpLoader;
 import fr.maxlego08.essentials.loader.VaultNoPermissionLoader;
 import fr.maxlego08.essentials.loader.VaultOpenLoader;
 import fr.maxlego08.essentials.messages.MessageLoader;
-import fr.maxlego08.essentials.migrations.CreateChatMessageMigration;
-import fr.maxlego08.essentials.migrations.CreateCommandsMigration;
-import fr.maxlego08.essentials.migrations.CreateEconomyTransactionMigration;
-import fr.maxlego08.essentials.migrations.CreatePlayerSlots;
-import fr.maxlego08.essentials.migrations.CreatePlayerVault;
-import fr.maxlego08.essentials.migrations.CreatePlayerVaultItem;
-import fr.maxlego08.essentials.migrations.CreateSanctionsTableMigration;
-import fr.maxlego08.essentials.migrations.CreateServerStorageTableMigration;
-import fr.maxlego08.essentials.migrations.CreateUserCooldownTableMigration;
-import fr.maxlego08.essentials.migrations.CreateUserEconomyMigration;
-import fr.maxlego08.essentials.migrations.CreateUserHomeTableMigration;
-import fr.maxlego08.essentials.migrations.CreateUserMailBoxMigration;
-import fr.maxlego08.essentials.migrations.CreateUserOptionTableMigration;
-import fr.maxlego08.essentials.migrations.CreateUserPlayTimeTableMigration;
-import fr.maxlego08.essentials.migrations.CreateUserPowerToolsMigration;
-import fr.maxlego08.essentials.migrations.CreateUserTableMigration;
-import fr.maxlego08.essentials.migrations.CreateVoteSiteMigration;
-import fr.maxlego08.essentials.migrations.UpdateUserTableAddSanctionColumns;
-import fr.maxlego08.essentials.migrations.UpdateUserTableAddVoteColumn;
 import fr.maxlego08.essentials.module.ZModuleManager;
 import fr.maxlego08.essentials.module.modules.HomeModule;
 import fr.maxlego08.essentials.module.modules.MailBoxModule;
@@ -97,6 +82,7 @@ import fr.maxlego08.essentials.user.placeholders.UserPlaceholders;
 import fr.maxlego08.essentials.user.placeholders.UserPlayTimePlaceholders;
 import fr.maxlego08.essentials.user.placeholders.VotePlaceholders;
 import fr.maxlego08.essentials.vault.VaultModule;
+import fr.maxlego08.essentials.worldedit.WorldeditModule;
 import fr.maxlego08.essentials.zutils.Metrics;
 import fr.maxlego08.essentials.zutils.ZPlugin;
 import fr.maxlego08.essentials.zutils.utils.CommandMarkdownGenerator;
@@ -111,7 +97,6 @@ import fr.maxlego08.menu.api.ButtonManager;
 import fr.maxlego08.menu.api.InventoryManager;
 import fr.maxlego08.menu.api.pattern.PatternManager;
 import fr.maxlego08.menu.button.loader.NoneLoader;
-import fr.maxlego08.sarah.MigrationManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -142,6 +127,7 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
 
     private final UUID consoleUniqueId = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private final List<Material> materials = Arrays.stream(Material.values()).filter(e -> !e.name().startsWith("LEGACY_")).toList();
+    private final Enchantments enchantments = new ZEnchantments();
     private EssentialsUtils essentialsUtils;
     private ServerStorage serverStorage = new ZServerStorage(this);
     private InventoryManager inventoryManager;
@@ -157,6 +143,7 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
 
         this.saveDefaultConfig();
         this.saveOrUpdateConfiguration("config.yml", true);
+        this.enchantments.register();
 
         FoliaLib foliaLib = new FoliaLib(this);
         this.serverImplementation = foliaLib.getImpl();
@@ -164,8 +151,6 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
         this.essentialsServer = isPaperVersion() ? new PaperServer(this) : new SpigotServer(this);
         this.interactiveChatHelper = isPaperVersion() ? new InteractiveChatPaperListener() : new InteractiveChatSpigotListener();
         this.registerListener(this.interactiveChatHelper);
-
-        this.registerMigrations();
 
         this.placeholder = new LocalPlaceholder(this);
         DistantPlaceholder distantPlaceholder = new DistantPlaceholder(this, this.placeholder);
@@ -239,6 +224,8 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
 
         this.getServer().getServicesManager().register(EssentialsPlugin.class, this, this, ServicePriority.Normal);
 
+        this.registerListener(new InvseeListener());
+
         this.generateDocs();
     }
 
@@ -284,31 +271,6 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
         this.buttonManager.register(new VaultOpenLoader(this));
         this.buttonManager.register(new VaultNoPermissionLoader(this));
 
-    }
-
-    private void registerMigrations() {
-
-        MigrationManager.setMigrationTableName("zessentials_migrations");
-
-        MigrationManager.registerMigration(new CreateServerStorageTableMigration());
-        MigrationManager.registerMigration(new CreateUserTableMigration());
-        MigrationManager.registerMigration(new CreateUserOptionTableMigration());
-        MigrationManager.registerMigration(new CreateUserCooldownTableMigration());
-        MigrationManager.registerMigration(new CreateUserEconomyMigration());
-        MigrationManager.registerMigration(new CreateEconomyTransactionMigration());
-        MigrationManager.registerMigration(new CreateUserHomeTableMigration());
-        MigrationManager.registerMigration(new CreateSanctionsTableMigration());
-        MigrationManager.registerMigration(new UpdateUserTableAddSanctionColumns());
-        MigrationManager.registerMigration(new CreateChatMessageMigration());
-        MigrationManager.registerMigration(new CreateCommandsMigration());
-        MigrationManager.registerMigration(new CreateUserPlayTimeTableMigration());
-        MigrationManager.registerMigration(new CreateUserPowerToolsMigration());
-        MigrationManager.registerMigration(new CreateUserMailBoxMigration());
-        MigrationManager.registerMigration(new UpdateUserTableAddVoteColumn());
-        MigrationManager.registerMigration(new CreateVoteSiteMigration());
-        MigrationManager.registerMigration(new CreatePlayerVaultItem());
-        MigrationManager.registerMigration(new CreatePlayerVault());
-        MigrationManager.registerMigration(new CreatePlayerSlots());
     }
 
     @Override
@@ -513,7 +475,6 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
             Reader defConfigStream = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
 
-
             Set<String> defaultKeys = defConfig.getKeys(deep);
 
             boolean configUpdated = false;
@@ -566,6 +527,11 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
         if (result.isEmpty()) return;
 
         MailBoxModule mailBoxModule = this.moduleManager.getModule(MailBoxModule.class);
+        if (!mailBoxModule.isEnable()) {
+            result.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+            return;
+        }
+
         result.values().forEach(item -> {
             int amount = itemStack.getAmount();
             if (amount > itemStack.getMaxStackSize()) {
@@ -600,11 +566,13 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
     }
 
 
-    private <T> Optional<T> createInstance(String className) {
+    @Override
+    public <T> Optional<T> createInstance(String className) {
         return createInstance(className, true);
     }
 
-    private <T> Optional<T> createInstance(String className, boolean displayLog) {
+    @Override
+    public <T> Optional<T> createInstance(String className, boolean displayLog) {
         try {
             Class<?> clazz = Class.forName("fr.maxlego08.essentials.hooks." + className);
 
@@ -634,9 +602,19 @@ public final class ZEssentialsPlugin extends ZPlugin implements EssentialsPlugin
     }
 
     @Override
+    public WorldeditManager getWorldeditManager() {
+        return this.moduleManager.getModule(WorldeditModule.class);
+    }
+
+    @Override
     public InteractiveChat startInteractiveChat(Player player, Consumer<String> consumer, long expiredAt) {
         InteractiveChat interactiveChat = new InteractiveChat(consumer, expiredAt);
         this.interactiveChatHelper.register(player, interactiveChat);
         return interactiveChat;
+    }
+
+    @Override
+    public Enchantments getEnchantments() {
+        return this.enchantments;
     }
 }

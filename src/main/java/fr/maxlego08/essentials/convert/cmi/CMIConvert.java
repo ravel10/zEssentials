@@ -1,6 +1,7 @@
 package fr.maxlego08.essentials.convert.cmi;
 
 import fr.maxlego08.essentials.api.EssentialsPlugin;
+import fr.maxlego08.essentials.api.convert.Convert;
 import fr.maxlego08.essentials.api.home.Home;
 import fr.maxlego08.essentials.storage.database.repositeries.UserEconomyRepository;
 import fr.maxlego08.essentials.storage.database.repositeries.UserHomeRepository;
@@ -20,7 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CMIConvert extends ZUtils {
+public class CMIConvert extends ZUtils implements Convert {
 
     private final EssentialsPlugin plugin;
 
@@ -28,6 +29,7 @@ public class CMIConvert extends ZUtils {
         this.plugin = plugin;
     }
 
+    @Override
     public void convert(CommandSender sender) {
 
         message(sender, "&fStart convert &7CMI");
@@ -58,7 +60,7 @@ public class CMIConvert extends ZUtils {
         List<CMIUser> cmiUsers = requestHelper.select("users", CMIUser.class, table -> {
         });
 
-        message(sender, "&aRecovery &f" + cmiUsers.size() + " &ausers.");
+        message(sender, "&aFound &f" + cmiUsers.size() + " &ausers.");
 
         var userRepository = sqlStorage.with(UserRepository.class);
         var userEconomyRepository = sqlStorage.with(UserEconomyRepository.class);
@@ -103,7 +105,7 @@ public class CMIConvert extends ZUtils {
             try {
                 String[] parts = entry.split("[$]|%%|:");
                 String name = parts[0];
-                int index =  parts.length == 10 ? 4 : parts.length == 9 ? 3 : 2;
+                int index = parts.length == 10 ? 4 : parts.length == 9 ? 3 : 2;
                 Material material = null;
                 if (parts.length == 9) {
                     try {
@@ -115,8 +117,8 @@ public class CMIConvert extends ZUtils {
                 double x = Double.parseDouble(parts[index + 1]);
                 double y = Double.parseDouble(parts[index + 2]);
                 double z = Double.parseDouble(parts[index + 3]);
-                double pitch = Double.parseDouble(parts[index + 4]);
-                double yaw = Double.parseDouble(parts[index + 5]);
+                double yaw = Double.parseDouble(parts[index + 4]);
+                double pitch = Double.parseDouble(parts[index + 5]);
 
                 var bukkitWorld = Bukkit.getWorld(world);
                 if (bukkitWorld == null) continue;

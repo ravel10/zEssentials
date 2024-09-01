@@ -8,6 +8,7 @@ import fr.maxlego08.essentials.commands.commands.chat.CommandChatClear;
 import fr.maxlego08.essentials.commands.commands.chat.CommandChatDisable;
 import fr.maxlego08.essentials.commands.commands.chat.CommandChatEnable;
 import fr.maxlego08.essentials.commands.commands.chat.CommandChatHistory;
+import fr.maxlego08.essentials.commands.commands.chat.CommandShowItem;
 import fr.maxlego08.essentials.commands.commands.cooldown.CommandCooldown;
 import fr.maxlego08.essentials.commands.commands.economy.CommandBalanceTop;
 import fr.maxlego08.essentials.commands.commands.economy.CommandEconomy;
@@ -73,12 +74,15 @@ import fr.maxlego08.essentials.commands.commands.utils.CommandHat;
 import fr.maxlego08.essentials.commands.commands.utils.CommandHeal;
 import fr.maxlego08.essentials.commands.commands.utils.CommandMore;
 import fr.maxlego08.essentials.commands.commands.utils.CommandNear;
+import fr.maxlego08.essentials.commands.commands.utils.CommandNightVision;
 import fr.maxlego08.essentials.commands.commands.utils.CommandPlayTime;
 import fr.maxlego08.essentials.commands.commands.utils.CommandRepair;
 import fr.maxlego08.essentials.commands.commands.utils.CommandRepairAll;
 import fr.maxlego08.essentials.commands.commands.utils.CommandRules;
+import fr.maxlego08.essentials.commands.commands.utils.CommandSudo;
 import fr.maxlego08.essentials.commands.commands.utils.CommandTrash;
 import fr.maxlego08.essentials.commands.commands.utils.CommandVersion;
+import fr.maxlego08.essentials.commands.commands.utils.admins.CommandEnchant;
 import fr.maxlego08.essentials.commands.commands.utils.admins.CommandFly;
 import fr.maxlego08.essentials.commands.commands.utils.admins.CommandGod;
 import fr.maxlego08.essentials.commands.commands.utils.admins.CommandInvsee;
@@ -107,6 +111,7 @@ import fr.maxlego08.essentials.commands.commands.weather.CommandNight;
 import fr.maxlego08.essentials.commands.commands.weather.CommandPlayerTime;
 import fr.maxlego08.essentials.commands.commands.weather.CommandPlayerWeather;
 import fr.maxlego08.essentials.commands.commands.weather.CommandSun;
+import fr.maxlego08.essentials.commands.commands.worldedit.CommandWorldEdit;
 import fr.maxlego08.essentials.zutils.utils.commands.VCommand;
 
 import java.util.ArrayList;
@@ -191,7 +196,7 @@ public class CommandLoader {
 
         register("sethome", CommandSetHome.class, "hcreate", "hc");
         register("delhome", CommandDelHome.class, "hdelete", "hd");
-        register("home", CommandHome.class, "h");
+        register("home", CommandHome.class, "h", "homes");
 
         register("ban", CommandBan.class);
         register("mute", CommandMute.class);
@@ -208,6 +213,7 @@ public class CommandLoader {
         register("chatenable", CommandChatEnable.class, "ce");
         register("chatdisable", CommandChatDisable.class, "cd");
         register("broadcast", CommandChatBroadcast.class, "bc");
+        register("showitem", CommandShowItem.class);
 
         register("message", CommandMessage.class, "msg", "tell", "whisper", "m");
         register("reply", CommandReply.class, "r");
@@ -223,6 +229,9 @@ public class CommandLoader {
         register("killall", CommandKillAll.class);
         register("seen", CommandSeen.class, "whois");
         register("seenip", CommandSeenIp.class, "whoisip");
+        register("enchant", CommandEnchant.class, "enchantment");
+        register("nightvision", CommandNightVision.class, "nv");
+        register("sudo", CommandSudo.class, "su");
 
         register("kit", CommandKit.class, "kits");
         register("showkit", CommandShowKit.class);
@@ -245,6 +254,7 @@ public class CommandLoader {
         register("voteparty", CommandVoteParty.class, "vp");
         register("vote", CommandVote.class);
         register("vault", CommandVault.class, "sac", "bag", "b", "coffre", "chest");
+        register("player-worldedit", CommandWorldEdit.class, "pwe", "ess-worldedit", "eworldedit", "ew");
 
         for (RegisterCommand registerCommand : this.commands) {
             try {

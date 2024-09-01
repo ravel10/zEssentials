@@ -21,6 +21,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.boss.BarColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -140,6 +141,11 @@ public class PaperComponent extends PlaceholderUtils implements AdventureCompone
         return this.MINI_MESSAGE.deserialize(colorMiniMessage(message), tagResolver);
     }
 
+    @Override
+    public BossBar createBossBar(String message, BossBar.Color barColor, BossBar.Overlay barStyle) {
+        return BossBar.bossBar(getComponent(message), 0, barColor, barStyle);
+    }
+
     public Component translateText(Player player, String message, TagResolver... tagResolvers) {
 
         TagResolver.Builder builder = TagResolver.builder();
@@ -201,10 +207,10 @@ public class PaperComponent extends PlaceholderUtils implements AdventureCompone
     }
 
     @Override
-    public void sendTitle(Player player, TitleMessage titleMessage) {
+    public void sendTitle(Player player, TitleMessage titleMessage, Object... args) {
 
-        Component title = getComponent(papi(titleMessage.title(), player));
-        Component subtitle = getComponent(papi(titleMessage.subtitle(), player));
+        Component title = getComponent(papi(getMessage(titleMessage.title(), args), player));
+        Component subtitle = getComponent(papi(getMessage(titleMessage.subtitle(), args), player));
 
         player.showTitle(Title.title(title, subtitle, Title.Times.times(Duration.ofMillis(titleMessage.start()), Duration.ofMillis(titleMessage.time()), Duration.ofMillis(titleMessage.end()))));
     }
